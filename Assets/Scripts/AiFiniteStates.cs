@@ -15,32 +15,47 @@ public enum AiStates
 }
 public class AiFiniteStates : MonoBehaviour
 {
-    public AiStates state=AiStates.searching;
+    public AiStates state = AiStates.searching;
+
     [SerializeField] protected int walkRadius;
     [SerializeField] protected int walkRadiusMax;
     protected NavMeshAgent agent;
     [SerializeField] protected int rayDistance;
     Animator anim;
 
-     void Awake() 
-     {
-        agent=GetComponent<NavMeshAgent>();
-        anim=GetComponent<Animator>();
-        
+    void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+        anim = GetComponent<Animator>();
     }
+
     /// <summary>
     /// Animation and Rotation of Agent
     /// </summary>
     protected void Updates()
     {
+        if (agent.velocity.magnitude > .1f)
+            agent.transform.eulerAngles = new Vector3(0, Quaternion.LookRotation(agent.velocity).eulerAngles.y, 0);
+
+
+        anim.SetFloat("Speed",agent.velocity.magnitude);
 
     }
+    /// <summary>
+    /// Set cover or Not
+    /// </summary>
+    /// <param name="isCover"></param>
     public void SetAnimCover(bool isCover)
     {
-        //Code will be come 
-
+        anim.SetBool("IsCover", isCover);
     }
-     public float NavMeshGetPathRemainingDistance(NavMeshAgent navMeshAgent)
+
+    /// <summary>
+    /// Check the Remaining distance of an Agent
+    /// </summary>
+    /// <param name="navMeshAgent"></param>
+    /// <returns></returns>
+    public float NavMeshGetPathRemainingDistance(NavMeshAgent navMeshAgent)
     {
         if (navMeshAgent.pathPending ||
             navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid ||
@@ -54,7 +69,12 @@ public class AiFiniteStates : MonoBehaviour
         }
 
         return distance;
-    } 
+    }  
+
+    /// <summary>
+    /// Get Random
+    /// </summary>
+    /// <returns></returns>
     public bool isRandomOdd()
     {
         var r = UnityEngine.Random.Range(1, 99);
