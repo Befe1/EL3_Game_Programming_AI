@@ -6,9 +6,12 @@ using UnityEngine.AI;
 using System.Linq;
 using BigRookGames.Weapons;
 
+/// <summary>
+/// Ai Bot Controller
+/// </summary>
 public class Runner : AiFiniteStates
 {
-   public bool IsDisguise = false;
+    public bool IsDisguise = false;
     public AiId id;
    
     [SerializeField] Transform point;   
@@ -19,7 +22,7 @@ public class Runner : AiFiniteStates
     [SerializeField] float coverStateDelay = .5f;
     [SerializeField] float shootStateDelay = .5f;
     [SerializeField] GunfireController gunFx;
-    //[SerializeField] GameObject spotLight;
+    [SerializeField] GameObject spotLight;
 
    
     private float nextTurnTime;
@@ -221,7 +224,7 @@ public class Runner : AiFiniteStates
                 if (hit.collider.gameObject.name.StartsWith("Runner"))
                 {
                     Debug.Log("Found !!");
-                    //spotLight.SetActive(false);
+                    spotLight.SetActive(false);
                     otherAi = hit.collider.transform;
 
                 if(isRandomOdd())
@@ -474,4 +477,5 @@ public class Runner : AiFiniteStates
         }
     }
 
+    
 }

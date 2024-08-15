@@ -1,17 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Ai Ids Enum
+/// </summary>
 public enum AiId
 {
     Ai_a,
-    Ai_b,
+    Ai_b
 }
 public class GameManager : MonoBehaviour
 {
-     public static GameManager Instance { get; private set; }
+    public static GameManager Instance { get; private set; }
 
     [SerializeField] Transform Ai_a;
     [SerializeField] Transform Ai_b;
@@ -36,9 +39,12 @@ public class GameManager : MonoBehaviour
         else return Ai_b;
     }
 
-    
+    /// <summary>
+    /// Restart the Game
+    /// </summary>
     public void GameRestart()
     {
-        //Restart the game 
+        SceneManager.LoadScene(0);
     }
+    
 }

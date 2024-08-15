@@ -1,11 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// Cover Random Location Provider
-/// </summary
-
+/// </summary>
 public class CoverWayPointManager : MonoBehaviour
 {
     public static CoverWayPointManager Instance { get; private set; }
@@ -142,4 +142,5 @@ public class CoverWayPointManager : MonoBehaviour
 
 
     }
+
 }

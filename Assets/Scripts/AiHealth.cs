@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AiHealth : MonoBehaviour
 {
+
     public delegate void GetShootAi(AiId id,int health);
     public static event GetShootAi OnGetShootAi;
 
@@ -24,4 +25,5 @@ public class AiHealth : MonoBehaviour
         health -=2;
         OnGetShootAi(id,health);
     }
+   
 }
