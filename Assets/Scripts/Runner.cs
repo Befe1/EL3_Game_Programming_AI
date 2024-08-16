@@ -23,6 +23,7 @@ public class Runner : AiFiniteStates
     [SerializeField] float shootStateDelay = .5f;
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
+    private Vector3 lastHitPosition;
 
    
     private float nextTurnTime;
@@ -36,6 +37,8 @@ public class Runner : AiFiniteStates
     float T_CoverDelay;
     float T_CoverStateDelay;
     float T_ShootStateDelay;
+    private float alertedTime = 5; 
+    private float currentAlertedTime;
     bool isAiDetect = false;
     bool isNewStatePos = false;
     bool goingToCover = false;
@@ -46,6 +49,7 @@ public class Runner : AiFiniteStates
     /// <summary>
     /// Init and Ranomize some variable of Ai Bot
     /// </summary>
+    /// 
     void Start()
     {      
         RandomPosition();
@@ -55,8 +59,15 @@ public class Runner : AiFiniteStates
         coverStateDelay = Random.Range(4.5f, 7.7f);
 
         health = GetComponent<AiHealth>();
+        AiHealth.OnGetShootAi += HandleGetShot;
 
     }
+     void OnDestroy()
+    {
+        AiHealth.OnGetShootAi -= HandleGetShot;
+    }
+
+
     Vector3 finalPosition;
 
     /// <summary>
@@ -107,6 +118,7 @@ public class Runner : AiFiniteStates
         {
             StateSearching();
         }
+        
 
         else if (state == AiStates.shooting)
         {
@@ -127,6 +139,10 @@ public class Runner : AiFiniteStates
         else if (state == AiStates.goingToNewShootingPos)
         {
             StateNewShootingPos();
+        }
+        else if (state == AiStates.alerted)
+        {
+            HandleAlertState();
         }
 
 
@@ -213,9 +229,15 @@ public class Runner : AiFiniteStates
                 d = RandomPosition();
             }
 
-        }       
+        }   
+        Testing_T();    
 
-            RaycastHit hit;
+           
+        
+    }
+     void Testing_T()
+    {
+         RaycastHit hit;
           
             if (Physics.Raycast(transform.position + new Vector3(0, 2, 0), transform.TransformDirection(Vector3.forward), out hit, rayDistance))
             {
@@ -243,7 +265,7 @@ public class Runner : AiFiniteStates
                 Debug.DrawRay(transform.position + new Vector3(0, 2, 0), transform.TransformDirection(Vector3.forward) * rayDistance, Color.blue);
                 Debug.Log("Did not Hit");
             }
-        
+
     }
 
     /// <summary>
@@ -263,6 +285,31 @@ public class Runner : AiFiniteStates
             gunFx.FireWeapon();
         }
     }
+     private void HandleGetShot(AiId shooterId, int shooterHealth)
+    {
+        if (state == AiStates.searching)
+        {
+            Debug.Log("Alerted");
+            state = AiStates.alerted;
+            currentAlertedTime = alertedTime; // Reset the alert timer
+        }
+    }
+    private void HandleAlertState()
+    {
+       // Rotate towards the last known bullet hit position
+        Vector3 direction = lastHitPosition - transform.position;
+        Quaternion lookRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5);  // Adjust the speed as necessary
+        Testing_T();
+
+        // Decrement the alert timer
+        currentAlertedTime -= Time.deltaTime;
+        if (currentAlertedTime <= 0)
+        {
+            state = AiStates.searching;  // Transition back to searching after alert duration
+        }
+    }
+    
     /// <summary>
     /// Stae of Stand Shoot
     /// </summary>
@@ -291,6 +338,8 @@ public class Runner : AiFiniteStates
 
 
     }
+    
+
 
 
     /// <summary>
@@ -472,6 +521,7 @@ public class Runner : AiFiniteStates
     {
         if (other.name.StartsWith("Bullet"))
         {
+            lastHitPosition = other.transform.position;  // Store the hit position
             Destroy(other.gameObject);
             health.GetShoot();
         }

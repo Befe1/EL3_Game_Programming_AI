@@ -5,25 +5,24 @@ using UnityEngine;
 public class AiHealth : MonoBehaviour
 {
 
-    public delegate void GetShootAi(AiId id,int health);
+   public delegate void GetShootAi(AiId id, int health);
     public static event GetShootAi OnGetShootAi;
 
     public int health = 100;
 
-    [SerializeField] Runner runner;
+    [SerializeField] private Runner runner;
+    private AiId id;
 
-    AiId id;
     void Start()
     {
-        id = runner.id;        
+        id = runner.id;
     }
-    /// <summary>
-    /// Handling Bullet Hit
-    /// </summary>
+
     public void GetShoot()
     {
-        health -=2;
-        OnGetShootAi(id,health);
+        health -= 2;
+        OnGetShootAi?.Invoke(id, health);
+        if (health <= 0) Destroy(gameObject);
     }
    
 }

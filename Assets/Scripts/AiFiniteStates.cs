@@ -11,6 +11,10 @@ public enum AiStates
     goingToCover,
     onCover,
     goingToNewShootingPos,
+    alerted,
+   
+   
+    
 
 }
 public class AiFiniteStates : MonoBehaviour

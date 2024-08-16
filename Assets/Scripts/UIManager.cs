@@ -28,7 +28,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     /// <param name="id"></param>
     /// <param name="health"></param>
-    private void AiHealth_OnGetShootAi(AiId id, int health)
+    private void AiHealth_OnGetShootAi(AiId id, int health )
     {
         if (id == AiId.Ai_a)
         {
