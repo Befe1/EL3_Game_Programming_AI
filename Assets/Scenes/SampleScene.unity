@@ -3074,6 +3074,10 @@ PrefabInstance:
       propertyPath: point
       value: 
       objectReference: {fileID: 598047722}
+    - target: {fileID: 3460094624466301892, guid: f47478331c127b148953d830eece3857, type: 3}
+      propertyPath: rotationSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3460094624734364499, guid: f47478331c127b148953d830eece3857, type: 3}
       propertyPath: m_LocalPosition.y
       value: 15.900001
@@ -6634,6 +6638,10 @@ PrefabInstance:
     - target: {fileID: 3460094624466301892, guid: f47478331c127b148953d830eece3857, type: 3}
       propertyPath: rayDistance
       value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 3460094624466301892, guid: f47478331c127b148953d830eece3857, type: 3}
+      propertyPath: rotationSpeed
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3460094624466301893, guid: f47478331c127b148953d830eece3857, type: 3}
       propertyPath: m_Speed

@@ -21,7 +21,7 @@ public class Runner : AiFiniteStates
     [SerializeField] float coverDelay = .5f;
     [SerializeField] float coverStateDelay = .5f;
     [SerializeField] float shootStateDelay = .5f;
-    [SerializeField] private float rotationSpeed = 5f; 
+    [SerializeField] private float rotationSpeed = 5; 
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
     private Vector3 lastHitPosition;
