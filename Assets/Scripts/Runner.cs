@@ -106,7 +106,20 @@ public class Runner : AiFiniteStates
     /// States Working
     /// </summary>
     void Update()
-    {       
+    { 
+        base.Updates();
+         
+            float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
+            if (distance != -1)  
+            {
+                
+                Debug.Log($"Distance between AI_a and AI_b: {distance}");
+            }
+            else
+            {
+                
+                Debug.LogError("Failed to calculate distance - one or both AI Transforms might be null.");
+            }      
 
 
         if (T_ShootDelay < shootDelay)
@@ -294,12 +307,21 @@ public class Runner : AiFiniteStates
             currentAlertedTime = alertedTime; // Reset the alert timer
         }
     }
+    
     private void HandleAlertState()
     {
-       // Rotate towards the last known bullet hit position
+        // Increase ray distance when alerted
+        if (currentAlertedTime == alertedTime) // Check if it's the initial call for alert state
+        {
+            SetRayDistance(25, 5); // Increase ray distance for 5 seconds
+        }
+
+        // Rotate towards the last known bullet hit position
         Vector3 direction = lastHitPosition - transform.position;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5);  // Adjust the speed as necessary
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5);
+
+        // Alert state behavior
         Testing_T();
 
         // Decrement the alert timer
@@ -307,6 +329,7 @@ public class Runner : AiFiniteStates
         if (currentAlertedTime <= 0)
         {
             state = AiStates.searching;  // Transition back to searching after alert duration
+            ResetRayDistance();  // Ensure ray distance is reset when exiting alert state
         }
     }
     

@@ -25,12 +25,14 @@ public class AiFiniteStates : MonoBehaviour
     [SerializeField] protected int walkRadiusMax;
     protected NavMeshAgent agent;
     [SerializeField] protected int rayDistance;
+    private int defaultRayDistance;
     Animator anim;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
+        defaultRayDistance = rayDistance;
     }
 
     /// <summary>
@@ -83,6 +85,17 @@ public class AiFiniteStates : MonoBehaviour
     {
         var r = UnityEngine.Random.Range(1, 99);
         return r % 2 != 0;
+    }
+    public void SetRayDistance(int distance, float duration)
+    {
+        rayDistance = distance;
+        Invoke("ResetRayDistance", duration);
+    }
+
+    // Method to reset ray distance to default
+    public void ResetRayDistance()
+    {
+        rayDistance = defaultRayDistance;
     }
 
 }

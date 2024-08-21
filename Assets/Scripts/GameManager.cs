@@ -38,6 +38,22 @@ public class GameManager : MonoBehaviour
         if (id == AiId.Ai_a) return Ai_a;
         else return Ai_b;
     }
+    /// <summary>
+    /// Calculate the distance between two specified AIs
+    /// </summary>
+    /// <returns>Distance between Ai_a and Ai_b</returns>
+    public float CalculateDistanceBetweenAIs()
+    {
+        if (Ai_a != null && Ai_b != null)
+        {
+            return Vector3.Distance(Ai_a.position, Ai_b.position);
+        }
+        else
+        {
+            Debug.LogError("One or both AI Transforms are not set.");
+            return -1; // Indicates an error
+        }
+    }
 
     /// <summary>
     /// Restart the Game

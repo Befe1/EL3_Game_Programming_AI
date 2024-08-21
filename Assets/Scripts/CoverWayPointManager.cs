@@ -20,10 +20,7 @@ public class CoverWayPointManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
-    {
-        
-    }
+    
 
     /// <summary>
     /// Random the Positions of Cover
