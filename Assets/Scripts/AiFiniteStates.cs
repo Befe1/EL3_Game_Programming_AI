@@ -26,6 +26,7 @@ public class AiFiniteStates : MonoBehaviour
     [SerializeField] protected int rayDistance;
     private int defaultRayDistance;
     Animator anim;
+    
 
     void Awake()
     {
@@ -75,7 +76,9 @@ public class AiFiniteStates : MonoBehaviour
         }
 
         return distance;
-    }  
+    } 
+    
+    
 
     /// <summary>
     /// Get Random
@@ -86,6 +89,7 @@ public class AiFiniteStates : MonoBehaviour
         var r = UnityEngine.Random.Range(1, 99);
         return r % 2 != 0;
     }
+    
     public void SetRayDistance(int distance, float duration)
     {
         rayDistance = distance;

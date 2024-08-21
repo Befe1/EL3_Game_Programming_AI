@@ -11,6 +11,12 @@ using BigRookGames.Weapons;
 /// </summary>
 public class Runner : AiFiniteStates
 {
+    [SerializeField] private List<Vector3> pathHistory = new List<Vector3>();
+    [SerializeField] private List<List<Vector3>> historicalPaths = new List<List<Vector3>>();
+    [SerializeField] private float similarityThreshold = 0.5f;  // Adjust as needed for path similarity
+    [SerializeField] private float recordInterval = 1.0f;
+    private float recordTimer;
+
     
     public bool IsDisguise = false;
     public AiId id;
@@ -25,6 +31,9 @@ public class Runner : AiFiniteStates
     [SerializeField] private float rotationSpeed = 5; 
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
+    
+    
+    
     private Vector3 lastHitPosition;
 
    
@@ -62,17 +71,12 @@ public class Runner : AiFiniteStates
 
         health = GetComponent<AiHealth>();
         AiHealth.OnGetShootAi += HandleGetShot;
-        
-        
-        
 
     }
 
      void OnDestroy()
     {
         AiHealth.OnGetShootAi -= HandleGetShot;
-
-        
     }
 
     Vector3 finalPosition;
@@ -105,6 +109,7 @@ public class Runner : AiFiniteStates
        // print(finalPosition.x.ToString());
         return finalPosition;
     }
+    
     private void SmoothRotateTowards(Vector3 targetPosition)
     {
         Vector3 directionToTarget = (targetPosition - transform.position).normalized;
@@ -121,6 +126,7 @@ public class Runner : AiFiniteStates
          // Optionally, retrieve and debug log the state of the other AI
         AiStates otherState = GameManager.Instance.GetAiState(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a);
         Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
+
         
          
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
@@ -171,9 +177,57 @@ public class Runner : AiFiniteStates
         {
             HandleAlertState();
         }
+        recordTimer += Time.deltaTime;
+        if (recordTimer >= recordInterval)
+        {
+            RecordCurrentPosition();
+            recordTimer = 0;
+        }
 
 
     }
+    private void RecordCurrentPosition()
+    {
+        if (pathHistory.Count == 0 || Vector3.Distance(pathHistory[pathHistory.Count - 1], transform.position) > 1.0f)
+        {
+            pathHistory.Add(transform.position);
+            Debug.Log($"Recording position: {transform.position}");
+        }
+    }
+
+     public void SavePath()
+    {
+        historicalPaths.Add(new List<Vector3>(pathHistory));
+        pathHistory.Clear();
+    }
+    public bool IsFollowingSamePath()
+    {
+        foreach (var oldPath in historicalPaths)
+        {
+            if (ComparePaths(oldPath, pathHistory))
+            {
+                Debug.Log("AI is following a previously recorded path.");
+                return true;
+            }
+        }
+        Debug.Log("AI is not following any previously recorded paths.");
+        return false;
+    }
+
+    private bool ComparePaths(List<Vector3> path1, List<Vector3> path2)
+    {
+        if (path1.Count != path2.Count)
+            return false;
+
+        for (int i = 0; i < path1.Count; i++)
+        {
+            if (Vector3.Distance(path1[i], path2[i]) > similarityThreshold)
+                return false;
+        }
+        return true;
+    }
+
+
 
    /// <summary>
    /// New State Position of Standing Shooting
@@ -562,6 +616,28 @@ public class Runner : AiFiniteStates
             lastHitPosition = other.transform.position;  // Store the hit position
             Destroy(other.gameObject);
             health.GetShoot();
+            
+            
+        }
+        
+    }
+    void OnDrawGizmos()
+    {
+        // Draw path history
+        Gizmos.color = Color.blue;
+        for (int i = 1; i < pathHistory.Count; i++)
+        {
+            Gizmos.DrawLine(pathHistory[i - 1], pathHistory[i]);
+        }
+
+        // Optionally draw historical paths in another color
+        Gizmos.color = Color.green;
+        foreach (var path in historicalPaths)
+        {
+            for (int i = 1; i < path.Count; i++)
+            {
+                Gizmos.DrawLine(path[i - 1], path[i]);
+            }
         }
     }
 
