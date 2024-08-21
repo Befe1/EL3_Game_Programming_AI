@@ -11,6 +11,7 @@ using BigRookGames.Weapons;
 /// </summary>
 public class Runner : AiFiniteStates
 {
+    
     public bool IsDisguise = false;
     public AiId id;
    
@@ -61,13 +62,18 @@ public class Runner : AiFiniteStates
 
         health = GetComponent<AiHealth>();
         AiHealth.OnGetShootAi += HandleGetShot;
+        
+        
+        
 
     }
+
      void OnDestroy()
     {
         AiHealth.OnGetShootAi -= HandleGetShot;
-    }
 
+        
+    }
 
     Vector3 finalPosition;
 
@@ -106,14 +112,15 @@ public class Runner : AiFiniteStates
         transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, Time.deltaTime * rotationSpeed);
     }
 
-
-  
-
     /// <summary>
     /// States Working and Distance Calcualtor
     /// </summary>
     void Update()
     { 
+         GameManager.Instance.UpdateAiState(id, state);
+         // Optionally, retrieve and debug log the state of the other AI
+        AiStates otherState = GameManager.Instance.GetAiState(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a);
+        Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
         
          
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 /// <summary>
 /// Ai Ids Enum
@@ -18,15 +19,41 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] Transform Ai_a;
     [SerializeField] Transform Ai_b;
-   
+    
+    
+    private Dictionary<AiId, AiStates> aiStates;
+    
     private void Awake()
     {
         
-           if(Instance != null) Destroy(Instance);      
-       
+          if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+        } else {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        aiStates = new Dictionary<AiId, AiStates>();
+        aiStates[AiId.Ai_a] = AiStates.searching;  // Default state
+        aiStates[AiId.Ai_b] = AiStates.searching;  // Default state
+
         
-    }   
+    }
+     public void UpdateAiState(AiId id, AiStates newState)
+    {
+        if (aiStates.ContainsKey(id))
+        {
+            aiStates[id] = newState;
+        }
+    }
+     public AiStates GetAiState(AiId id)
+    {
+        if (aiStates.TryGetValue(id, out AiStates state))
+        {
+            return state;
+        }
+        return AiStates.searching; // Return a default state if not found
+    }
+   
 
     /// <summary>
     /// Get the Specific Ai from Id

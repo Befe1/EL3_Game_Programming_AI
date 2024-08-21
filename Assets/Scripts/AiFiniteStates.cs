@@ -20,7 +20,6 @@ public enum AiStates
 public class AiFiniteStates : MonoBehaviour
 {
     public AiStates state = AiStates.searching;
-
     [SerializeField] protected int walkRadius;
     [SerializeField] protected int walkRadiusMax;
     protected NavMeshAgent agent;
@@ -34,6 +33,7 @@ public class AiFiniteStates : MonoBehaviour
         anim = GetComponent<Animator>();
         defaultRayDistance = rayDistance;
     }
+    
 
     /// <summary>
     /// Animation and Rotation of Agent
@@ -97,5 +97,6 @@ public class AiFiniteStates : MonoBehaviour
     {
         rayDistance = defaultRayDistance;
     }
+    
 
 }
