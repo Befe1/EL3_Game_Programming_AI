@@ -122,24 +122,11 @@ public class Runner : AiFiniteStates
     /// </summary>
     void Update()
     { 
-         GameManager.Instance.UpdateAiState(id, state);
-         // Optionally, retrieve and debug log the state of the other AI
+        GameManager.Instance.UpdateAiState(id, state);
         AiStates otherState = GameManager.Instance.GetAiState(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a);
         Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
-
-        
-         
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
-        if (distance != -1)  
-        {
-                
-             Debug.Log($"Distance between AI_a and AI_b: {distance}");
-        }
-        else
-        {
-                
-             Debug.LogError("Failed to calculate distance - one or both AI Transforms might be null.");
-         }      
+        Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
 
 
         if (T_ShootDelay < shootDelay)
@@ -183,6 +170,10 @@ public class Runner : AiFiniteStates
             RecordCurrentPosition();
             recordTimer = 0;
         }
+        if (distance < 5.0f && state != AiStates.searching && state != AiStates.alerted)
+        {
+            AdjustPosition();
+        }
 
 
     }
@@ -225,6 +216,18 @@ public class Runner : AiFiniteStates
                 return false;
         }
         return true;
+    }
+    void AdjustPosition()
+    {
+        // Logic to move AI away from each other
+        // This could involve setting a new destination point that increases their separation
+        Vector3 awayDirection = transform.position - GameManager.Instance.GetAi(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a).position;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position + awayDirection.normalized * 5.0f, out hit, 10.0f, NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
+        }
+        Debug.Log("Adjusting position to maintain distance.");
     }
 
 
@@ -630,7 +633,7 @@ public class Runner : AiFiniteStates
             Gizmos.DrawLine(pathHistory[i - 1], pathHistory[i]);
         }
 
-        // Optionally draw historical paths in another color
+        
         Gizmos.color = Color.green;
         foreach (var path in historicalPaths)
         {
