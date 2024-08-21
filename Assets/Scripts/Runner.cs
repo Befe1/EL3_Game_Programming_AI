@@ -103,23 +103,23 @@ public class Runner : AiFiniteStates
   
 
     /// <summary>
-    /// States Working
+    /// States Working and Distance Calcualtor
     /// </summary>
     void Update()
     { 
-        base.Updates();
+        
          
-            float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
-            if (distance != -1)  
-            {
+        float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
+        if (distance != -1)  
+        {
                 
-                Debug.Log($"Distance between AI_a and AI_b: {distance}");
-            }
-            else
-            {
+             Debug.Log($"Distance between AI_a and AI_b: {distance}");
+        }
+        else
+        {
                 
-                Debug.LogError("Failed to calculate distance - one or both AI Transforms might be null.");
-            }      
+             Debug.LogError("Failed to calculate distance - one or both AI Transforms might be null.");
+         }      
 
 
         if (T_ShootDelay < shootDelay)
