@@ -21,6 +21,7 @@ public class Runner : AiFiniteStates
     [SerializeField] float coverDelay = .5f;
     [SerializeField] float coverStateDelay = .5f;
     [SerializeField] float shootStateDelay = .5f;
+    [SerializeField] private float rotationSpeed = 5f; 
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
     private Vector3 lastHitPosition;
@@ -97,6 +98,12 @@ public class Runner : AiFiniteStates
         point.position = finalPosition;
        // print(finalPosition.x.ToString());
         return finalPosition;
+    }
+    private void SmoothRotateTowards(Vector3 targetPosition)
+    {
+        Vector3 directionToTarget = (targetPosition - transform.position).normalized;
+        Quaternion desiredRotation = Quaternion.LookRotation(directionToTarget);
+        transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, Time.deltaTime * rotationSpeed);
     }
 
 
@@ -220,30 +227,34 @@ public class Runner : AiFiniteStates
     /// </summary>
     void StateSearching()
     {
-        if (agent.velocity.magnitude == 0)
+        
+        
+        if (NavMeshGetPathRemainingDistance(agent) < 0.3f || agent.velocity.magnitude == 0)
         {
-            var d = RandomPosition();
+            Vector3 newPosition = RandomPosition();
 
-            while (Vector3.Distance(d, transform.position) < 15)
+            
+            while (Vector3.Distance(newPosition, transform.position) < 15)
             {
-                d = RandomPosition();
+                newPosition = RandomPosition();
             }
+
+            agent.SetDestination(newPosition); 
+            agent.isStopped = false; 
         }
 
-
-        agent.SetDestination(finalPosition);
-
-        if (NavMeshGetPathRemainingDistance(agent) < .3f)
+        
+        if (agent.velocity.sqrMagnitude > Mathf.Epsilon) 
         {
-            var d = RandomPosition();
+            SmoothRotateTowards(agent.destination); 
+        }
+        else
+        {
+            
+            transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+        }
 
-            while (Vector3.Distance(d, transform.position) < 15)
-            {
-                d = RandomPosition();
-            }
-
-        }   
-        Testing_T();    
+        Testing_T();   
 
            
         
@@ -316,10 +327,7 @@ public class Runner : AiFiniteStates
             SetRayDistance(25, 5); // Increase ray distance for 5 seconds
         }
 
-        // Rotate towards the last known bullet hit position
-        Vector3 direction = lastHitPosition - transform.position;
-        Quaternion lookRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5);
+        SmoothRotateTowards(lastHitPosition);
 
         // Alert state behavior
         Testing_T();
