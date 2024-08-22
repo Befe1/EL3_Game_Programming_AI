@@ -13,7 +13,7 @@ public class Runner : AiFiniteStates
 {
     [SerializeField] private List<Vector3> pathHistory = new List<Vector3>();
     [SerializeField] private List<List<Vector3>> historicalPaths = new List<List<Vector3>>();
-    [SerializeField] private float similarityThreshold = 0.5f;  // Adjust as needed for path similarity
+    [SerializeField] private float similarityThreshold = 1.5f;  // Adjust as needed for path similarity
     [SerializeField] private float recordInterval = 1.0f;
     private float recordTimer;
 
@@ -29,16 +29,16 @@ public class Runner : AiFiniteStates
     [SerializeField] float coverStateDelay = .5f;
     [SerializeField] float shootStateDelay = .5f;
     [SerializeField] private float rotationSpeed = 5; 
+    [SerializeField] private float pathFollowDelay = 5f; // Time in seconds to delay following a saved path
+    
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
     
     
     
     private Vector3 lastHitPosition;
-
-   
-    private float nextTurnTime;
-    private Transform startTransform;
+    
+    private float pathFollowTimer = 0;
 
     public float multiplyBy;
     public float multiplyByMax;
@@ -50,7 +50,6 @@ public class Runner : AiFiniteStates
     float T_ShootStateDelay;
     private float alertedTime = 5; 
     private float currentAlertedTime;
-    bool isAiDetect = false;
     bool isNewStatePos = false;
     bool goingToCover = false;
     bool isCoverStand = true;
@@ -127,6 +126,7 @@ public class Runner : AiFiniteStates
         Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
         Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
+        
 
 
         if (T_ShootDelay < shootDelay)
@@ -206,20 +206,24 @@ public class Runner : AiFiniteStates
 
     private bool ComparePaths(List<Vector3> path1, List<Vector3> path2)
     {
-        if (path1.Count != path2.Count)
-            return false;
+        if (Mathf.Abs(path1.Count - path2.Count) > similarityThreshold * 10) // Allow for some difference in path lengths
+        return false;
 
-        for (int i = 0; i < path1.Count; i++)
+        float cumulativeDifference = 0f;
+        int compareLength = Mathf.Min(path1.Count, path2.Count);
+
+        for (int i = 0; i < compareLength; i++)
         {
-            if (Vector3.Distance(path1[i], path2[i]) > similarityThreshold)
-                return false;
+            cumulativeDifference += Vector3.Distance(path1[i], path2[i]);
         }
-        return true;
+
+        float averageDifference = cumulativeDifference / compareLength;
+
+        // Check if the average difference per point is within a defined similarity threshold
+        return averageDifference < similarityThreshold;
     }
     void AdjustPosition()
     {
-        // Logic to move AI away from each other
-        // This could involve setting a new destination point that increases their separation
         Vector3 awayDirection = transform.position - GameManager.Instance.GetAi(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a).position;
         NavMeshHit hit;
         if (NavMesh.SamplePosition(transform.position + awayDirection.normalized * 5.0f, out hit, 10.0f, NavMesh.AllAreas))
@@ -236,8 +240,6 @@ public class Runner : AiFiniteStates
             Debug.DrawLine(transform.position, closestWayPoint.position, Color.red);
         }
     }
-
-
 
    /// <summary>
    /// New State Position of Standing Shooting
@@ -299,33 +301,50 @@ public class Runner : AiFiniteStates
     void StateSearching()
     {
         
-        
-        if (NavMeshGetPathRemainingDistance(agent) < 0.3f || agent.velocity.magnitude == 0)
-        {
-            Vector3 newPosition = RandomPosition();
-
+        if (state != AiStates.searching) {
             
-            while (Vector3.Distance(newPosition, transform.position) < 15)
-            {
-                newPosition = RandomPosition();
-            }
-
-            agent.SetDestination(newPosition); 
-            agent.isStopped = false; 
+            pathFollowTimer = 0;
+            SavePath();  
         }
 
         
-        if (agent.velocity.sqrMagnitude > Mathf.Epsilon) 
-        {
-            SmoothRotateTowards(agent.destination); 
+        pathFollowTimer += Time.deltaTime;
+        recordTimer += Time.deltaTime;
+
+        
+        if (recordTimer >= recordInterval) {
+            RecordCurrentPosition();
+            recordTimer = 0;  
         }
-        else
-        {
+
+        
+        if (pathFollowTimer < pathFollowDelay) {
+            if (IsFollowingSamePath()) {  
+                Debug.Log("Attempting to follow a too similar path, recalculating...");
+                Vector3 newPosition = RandomPosition();  // Force a new random position to avoid repetition
+                agent.SetDestination(newPosition);
+            }
+        }
+
+        
+        if (NavMeshGetPathRemainingDistance(agent) < 0.3f || agent.velocity.magnitude == 0) {
+            Vector3 newPosition = RandomPosition();
+            while (Vector3.Distance(newPosition, transform.position) < 15) {
+                newPosition = RandomPosition();  
+            }
+            agent.SetDestination(newPosition);
+            agent.isStopped = false;
+        }
+
+        
+        if (agent.velocity.sqrMagnitude > Mathf.Epsilon) {
+            SmoothRotateTowards(agent.destination);
+        } else {
             
             transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
         }
 
-        Testing_T();   
+        Testing_T();  
 
            
         
