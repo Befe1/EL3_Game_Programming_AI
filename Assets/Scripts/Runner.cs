@@ -170,12 +170,11 @@ public class Runner : AiFiniteStates
             RecordCurrentPosition();
             recordTimer = 0;
         }
-        if (distance < 5.0f && state != AiStates.searching && state != AiStates.alerted)
+        if (distance < 10.0f && state != AiStates.searching && state != AiStates.alerted)
         {
             AdjustPosition();
         }
-
-
+        DebugClosestCoverPoint();
     }
     private void RecordCurrentPosition()
     {
@@ -228,6 +227,14 @@ public class Runner : AiFiniteStates
             agent.SetDestination(hit.position);
         }
         Debug.Log("Adjusting position to maintain distance.");
+    }
+    private void DebugClosestCoverPoint()
+    {
+        Transform closestWayPoint = CoverWayPointManager.Instance.GetClosestWayPoint(transform.position);
+        if (closestWayPoint != null)
+        {
+            Debug.DrawLine(transform.position, closestWayPoint.position, Color.red);
+        }
     }
 
 
@@ -591,14 +598,10 @@ public class Runner : AiFiniteStates
         agent.isStopped = false;
         GetComponents<Collider>()[0].enabled = true;
     }
-
     private void LateUpdate()
     {
         base.Updates();
     }
-
- 
-   
 
     void ActiveDeactiveAll(GameObject[] objs,bool val)
     {
@@ -619,8 +622,6 @@ public class Runner : AiFiniteStates
             lastHitPosition = other.transform.position;  // Store the hit position
             Destroy(other.gameObject);
             health.GetShoot();
-            
-            
         }
         
     }

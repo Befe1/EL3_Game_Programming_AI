@@ -19,6 +19,23 @@ public class CoverWayPointManager : MonoBehaviour
 
         Instance = this;
     }
+     // Method to get the closest waypoint
+    public Transform GetClosestWayPoint(Vector3 position)
+    {
+        Transform closest = null;
+        float minDistance = float.MaxValue;
+
+        foreach (Transform waypoint in wayPoints)
+        {
+            float distance = Vector3.Distance(position, waypoint.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = waypoint;
+            }
+        }
+        return closest;
+    }
 
     
 
@@ -94,6 +111,7 @@ public class CoverWayPointManager : MonoBehaviour
 
         return null;
     }
+    
 
     /// <summary>
     /// Detect if Enemy is Direct Seen from sight
