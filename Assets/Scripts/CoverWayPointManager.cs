@@ -138,7 +138,7 @@ public class CoverWayPointManager : MonoBehaviour
 
             Debug.DrawRay(ai.position + new Vector3(0, .3f, 0), direction * distance, color);
 
-            Debug.Log("Did Hit => " + hit.collider.gameObject.name);
+           // Debug.Log("Did Hit => " + hit.collider.gameObject.name);
 
             if (hit.collider.gameObject.name.StartsWith("Runner"))
             {             

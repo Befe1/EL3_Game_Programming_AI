@@ -1953,6 +1953,7 @@ GameObject:
   - component: {fileID: 1082723747221666423}
   - component: {fileID: 1082723747221666408}
   - component: {fileID: 8598115022301744179}
+  - component: {fileID: 5033892319600853311}
   m_Layer: 7
   m_Name: Runner
   m_TagString: Player
@@ -2061,6 +2062,9 @@ MonoBehaviour:
   walkRadius: 15
   walkRadiusMax: 25
   rayDistance: 17
+  pathHistory: []
+  similarityThreshold: 1.5
+  recordInterval: 1
   IsDisguise: 0
   id: 0
   point: {fileID: 0}
@@ -2070,10 +2074,10 @@ MonoBehaviour:
   coverDelay: 0.5
   coverStateDelay: 0.5
   shootStateDelay: 0.5
+  rotationSpeed: 5
+  pathFollowDelay: 5
   gunFx: {fileID: 5096649377637735196}
   spotLight: {fileID: 8100214635102340432}
-  multiplyBy: 15
-  multiplyByMax: 35
 --- !u!54 &1082723747221666423
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2138,6 +2142,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   runner: {fileID: 3460094624466301892}
+--- !u!114 &5033892319600853311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2934613853674785206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c2962519a81a9f408a2d9d07be490e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2940991278914294280
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ public class Runner : AiFiniteStates
 {
     [SerializeField] private List<Vector3> pathHistory = new List<Vector3>();
     [SerializeField] private List<List<Vector3>> historicalPaths = new List<List<Vector3>>();
-    [SerializeField] private float similarityThreshold = 1.5f;  // Adjust as needed for path similarity
+    [SerializeField] private float similarityThreshold = 1.5f; 
     [SerializeField] private float recordInterval = 1.0f;
     private float recordTimer;
 
@@ -29,10 +29,11 @@ public class Runner : AiFiniteStates
     [SerializeField] float coverStateDelay = .5f;
     [SerializeField] float shootStateDelay = .5f;
     [SerializeField] private float rotationSpeed = 5; 
-    [SerializeField] private float pathFollowDelay = 5f; // Time in seconds to delay following a saved path
+    [SerializeField] private float pathFollowDelay = 5f; 
     
     [SerializeField] GunfireController gunFx;
     [SerializeField] GameObject spotLight;
+    
     
     
     
@@ -88,27 +89,24 @@ public class Runner : AiFiniteStates
     /// <returns></returns>
     Vector3 RandomPosition()
     {
-        Vector3 randomDirection = Random.insideUnitSphere * Random.Range( walkRadius,walkRadiusMax);
-        randomDirection += transform.position;
-        NavMeshHit hit;
-        NavMesh.SamplePosition(randomDirection, out hit, walkRadius, 1);
-        finalPosition = hit.position;
-
-        while (finalPosition.x.ToString().Equals("Infinity"))
+        int retries = 10; 
+        while (retries > 0)
         {
-            randomDirection = Random.insideUnitSphere * Random.Range(walkRadius, walkRadiusMax);
+            Vector3 randomDirection = Random.insideUnitSphere * Random.Range(walkRadius, walkRadiusMax);
             randomDirection += transform.position;
-            NavMesh.SamplePosition(randomDirection, out hit, walkRadius, 1);
-            finalPosition = hit.position;
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomDirection, out hit, walkRadius, 1))
+            {
+                finalPosition = hit.position;
+                if (!float.IsInfinity(finalPosition.x)) // Checking if the position is valid
+                {
+                    point.position = finalPosition;
+                    return finalPosition;
+                }
+            }
+            retries--;
         }
-
-
-       // print(hit.position);
-
-      
-        point.position = finalPosition;
-       // print(finalPosition.x.ToString());
-        return finalPosition;
+        return transform.position;
     }
     
     private void SmoothRotateTowards(Vector3 targetPosition)
@@ -125,7 +123,7 @@ public class Runner : AiFiniteStates
     { 
         GameManager.Instance.UpdateAiState(id, state);
         AiStates otherState = GameManager.Instance.GetAiState(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a);
-        Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
+        //Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
         //Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
         
@@ -183,7 +181,7 @@ public class Runner : AiFiniteStates
         if (pathHistory.Count == 0 || Vector3.Distance(pathHistory[pathHistory.Count - 1], transform.position) > 1.0f)
         {
             pathHistory.Add(transform.position);
-            Debug.Log($"Recording position: {transform.position}");
+            //Debug.Log($"Recording position: {transform.position}");
         }
     }
 
@@ -198,11 +196,11 @@ public class Runner : AiFiniteStates
         {
             if (ComparePaths(oldPath, pathHistory))
             {
-                Debug.Log("AI is following a previously recorded path.");
+                //Debug.Log("AI is following a previously recorded path.");
                 return true;
             }
         }
-        Debug.Log("AI is not following any previously recorded paths.");
+        //Debug.Log("AI is not following any previously recorded paths.");
         return false;
     }
 
@@ -232,16 +230,9 @@ public class Runner : AiFiniteStates
         {
             agent.SetDestination(hit.position);
         }
-        Debug.Log("Adjusting position to maintain distance.");
+        //Debug.Log("Adjusting position to maintain distance.");
     }
-    private void DebugClosestCoverPoint()
-    {
-        Transform closestWayPoint = CoverWayPointManager.Instance.GetClosestWayPoint(transform.position);
-        if (closestWayPoint != null)
-        {
-            Debug.DrawLine(transform.position, closestWayPoint.position, Color.red);
-        }
-    }
+    
 
    /// <summary>
    /// New State Position of Standing Shooting
@@ -249,41 +240,37 @@ public class Runner : AiFiniteStates
     void StateNewShootingPos()
     {
         print("State New Shoot Pos ...");
-       
-        agent.isStopped = false;
 
-        if (!isNewStatePos)
+    agent.isStopped = false;
+
+    if (!isNewStatePos)
+    {
+        var d = RandomPosition();
+
+        while (Vector3.Distance(d, transform.position) < 15)
         {
-            var d = RandomPosition();
-
-            while (Vector3.Distance(d, transform.position) < 15)
-            {
-                d = RandomPosition();
-            }
-
-          
-
-            isNewStatePos = true;
-
-            agent.SetDestination(finalPosition);
-        }       
-
-       else if (NavMeshGetPathRemainingDistance(agent) < .9f)
-        {
-            print("End !! State New Shoot Pos ...");
-
-            isNewStatePos = false;
-
-            if (decisionMaker.MakeDecisionBasedOnState(state, id)) {
-                
-                agent.isStopped = true;
-                state = AiStates.shooting;
-            }
-            else
-            {
-                SetGoingToCoverState();
-            }
+            d = RandomPosition();
         }
+
+        isNewStatePos = true;
+        agent.SetDestination(finalPosition);
+    }       
+    else if (NavMeshGetPathRemainingDistance(agent) < .9f)
+    {
+        print("End !! State New Shoot Pos ...");
+
+        isNewStatePos = false;
+
+        if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health)) 
+        {
+            agent.isStopped = true;
+            state = AiStates.shooting;
+        }
+        else
+        {
+            SetGoingToCoverState();
+        }
+    }
     }
 
     /// <summary>
@@ -365,7 +352,7 @@ public class Runner : AiFiniteStates
                     spotLight.SetActive(false);
                     otherAi = hit.collider.transform;
 
-                if(decisionMaker.MakeDecisionBasedOnState(state, id))
+                if(decisionMaker.MakeDecisionBasedOnState(state, id, health.health))
                 
                     state = AiStates.shooting;                
                 else
@@ -374,12 +361,12 @@ public class Runner : AiFiniteStates
                 }
 
 
-                Debug.Log("Did Hit");
+                //Debug.Log("Did Hit");
             }
             else
             {
                 Debug.DrawRay(transform.position + new Vector3(0, 2, 0), transform.TransformDirection(Vector3.forward) * rayDistance, Color.blue);
-                Debug.Log("Did not Hit");
+                //Debug.Log("Did not Hit");
             }
 
     }
@@ -448,7 +435,7 @@ public class Runner : AiFiniteStates
         {
             T_ShootStateDelay = 0;
 
-            if (decisionMaker.MakeDecisionBasedOnState(state, id))
+            if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health))
             {
                 state = AiStates.goingToCover;
                 agent.isStopped = false;
@@ -519,7 +506,7 @@ public class Runner : AiFiniteStates
         isCoverStand = false;
 
         if (d > 70f) {
-            if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
+            if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health)) // Use new decision-making method
             {
                 SetGoingToCoverState();
             }
@@ -537,7 +524,7 @@ public class Runner : AiFiniteStates
 
         if (d > 70f)
         {
-            if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
+            if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health)) // Use new decision-making method
             {
                 SetGoingToCoverState();
             }
@@ -568,7 +555,7 @@ public class Runner : AiFiniteStates
     {
         T_CoverStateDelay = 0f;
 
-        if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
+        if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health)) // Use new decision-making method
         {
             SetGoingToCoverState();
         }
@@ -589,7 +576,7 @@ public class Runner : AiFiniteStates
     {
         if (CoverWayPointManager.Instance.IsEnemySeen(otherAi.GetComponent<Runner>().id, transform))
         {
-            if (decisionMaker.MakeDecisionBasedOnState(state, id))
+            if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health))
             {
                 SetStateNewShootingPos();
             }
@@ -654,6 +641,14 @@ public class Runner : AiFiniteStates
             {
                 Gizmos.DrawLine(path[i - 1], path[i]);
             }
+        }
+    }
+    private void DebugClosestCoverPoint()
+    {
+        Transform closestWayPoint = CoverWayPointManager.Instance.GetClosestWayPoint(transform.position);
+        if (closestWayPoint != null)
+        {
+            Debug.DrawLine(transform.position, closestWayPoint.position, Color.red);
         }
     }
 
