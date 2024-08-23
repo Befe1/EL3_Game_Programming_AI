@@ -40,10 +40,10 @@ public class Runner : AiFiniteStates
     
     private float pathFollowTimer = 0;
 
-    public float multiplyBy;
-    public float multiplyByMax;
+    //public float multiplyBy;
+    //public float multiplyByMax;
 
-    bool isGoingTowardBonus = false;
+    //bool isGoingTowardBonus = false;
     float T_ShootDelay;
     float T_CoverDelay;
     float T_CoverStateDelay;
@@ -56,12 +56,13 @@ public class Runner : AiFiniteStates
     Transform otherAi;
 
     AiHealth health;
+    private DecisionMaker decisionMaker;
     /// <summary>
     /// Init and Ranomize some variable of Ai Bot
     /// </summary>
     /// 
     void Start()
-    {      
+    {     
         RandomPosition();
 
         coverDelay = Random.Range(2.5f,5f);
@@ -70,6 +71,7 @@ public class Runner : AiFiniteStates
 
         health = GetComponent<AiHealth>();
         AiHealth.OnGetShootAi += HandleGetShot;
+        decisionMaker = GetComponent<DecisionMaker>();
 
     }
 
@@ -125,7 +127,7 @@ public class Runner : AiFiniteStates
         AiStates otherState = GameManager.Instance.GetAiState(id == AiId.Ai_a ? AiId.Ai_b : AiId.Ai_a);
         Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
         float distance = GameManager.Instance.CalculateDistanceBetweenAIs();
-        Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
+        //Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
         
 
 
@@ -272,7 +274,7 @@ public class Runner : AiFiniteStates
 
             isNewStatePos = false;
 
-            if (isRandomOdd()) {
+            if (decisionMaker.MakeDecisionBasedOnState(state, id)) {
                 
                 agent.isStopped = true;
                 state = AiStates.shooting;
@@ -363,7 +365,7 @@ public class Runner : AiFiniteStates
                     spotLight.SetActive(false);
                     otherAi = hit.collider.transform;
 
-                if(isRandomOdd())
+                if(decisionMaker.MakeDecisionBasedOnState(state, id))
                 
                     state = AiStates.shooting;                
                 else
@@ -446,7 +448,7 @@ public class Runner : AiFiniteStates
         {
             T_ShootStateDelay = 0;
 
-            if (isRandomOdd())
+            if (decisionMaker.MakeDecisionBasedOnState(state, id))
             {
                 state = AiStates.goingToCover;
                 agent.isStopped = false;
@@ -502,77 +504,22 @@ public class Runner : AiFiniteStates
     void ShootOnCover()
     {
         if (isCoverStand) {
-            if (T_CoverDelay < coverDelay)
-                T_CoverDelay += Time.deltaTime;
-        }
-        else
-        {
-            if (T_CoverDelay > 0 )
-                T_CoverDelay -= Time.deltaTime;
-        }
+        if (T_CoverDelay < coverDelay)
+            T_CoverDelay += Time.deltaTime;
+    }
+    else {
+        if (T_CoverDelay > 0)
+            T_CoverDelay -= Time.deltaTime;
+    }
 
-        var d = Vector3.Distance(transform.position, otherAi.position) * 2;
+    var d = Vector3.Distance(transform.position, otherAi.position) * 2;
 
-        if (T_CoverDelay >= coverDelay && isCoverStand)
-        { 
-            isCoverStand = false;
+    if (T_CoverDelay >= coverDelay && isCoverStand)
+    { 
+        isCoverStand = false;
 
-            if (d > 70f) {
-
-                if (isRandomOdd())
-                {
-                    SetGoingToCoverState();
-                }
-                else
-                {
-                    SetStateNewShootingPos();
-                }
-                return;
-            }
-          
-        }
-
-        if (!isCoverStand && T_CoverDelay <= 0f)
-        {
-            isCoverStand = true;
-
-            if (d > 70f)
-            {
-                if (isRandomOdd())
-                {
-                    SetGoingToCoverState();
-                }
-                else
-                {
-                    SetStateNewShootingPos();
-                }
-                return;
-            }
-        }
-       
-
-        if (isCoverStand)
-        {
-            GetComponents<Collider>()[0].enabled = true;
-            Shoot();
-            SetAnimCover(false);
-        }
-        else
-        {
-            GetComponents<Collider>()[0].enabled = false;
-            SetAnimCover(true);
-        }
-
-
-
-        if (T_CoverStateDelay < coverStateDelay)
-            T_CoverStateDelay += Time.deltaTime;
-
-        if (T_CoverStateDelay >= coverStateDelay)
-        {
-            T_CoverStateDelay = 0f;
-
-            if (isRandomOdd())
+        if (d > 70f) {
+            if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
             {
                 SetGoingToCoverState();
             }
@@ -580,12 +527,58 @@ public class Runner : AiFiniteStates
             {
                 SetStateNewShootingPos();
             }
-
+            return;
         }
+    }
 
+    if (!isCoverStand && T_CoverDelay <= 0f)
+    {
+        isCoverStand = true;
 
+        if (d > 70f)
+        {
+            if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
+            {
+                SetGoingToCoverState();
+            }
+            else
+            {
+                SetStateNewShootingPos();
+            }
+            return;
+        }
+    }
+    
+    if (isCoverStand)
+    {
+        GetComponents<Collider>()[0].enabled = true;
+        Shoot();
+        SetAnimCover(false);
+    }
+    else
+    {
+        GetComponents<Collider>()[0].enabled = false;
+        SetAnimCover(true);
+    }
 
-        CheckEnemySeen();      
+    if (T_CoverStateDelay < coverStateDelay)
+        T_CoverStateDelay += Time.deltaTime;
+
+    if (T_CoverStateDelay >= coverStateDelay)
+    {
+        T_CoverStateDelay = 0f;
+
+        if (decisionMaker.MakeDecisionBasedOnState(state, id)) // Use new decision-making method
+        {
+            SetGoingToCoverState();
+        }
+        else
+        {
+            SetStateNewShootingPos();
+        }
+    }
+
+    CheckEnemySeen();     
 
     }
 
@@ -596,7 +589,7 @@ public class Runner : AiFiniteStates
     {
         if (CoverWayPointManager.Instance.IsEnemySeen(otherAi.GetComponent<Runner>().id, transform))
         {
-            if (isRandomOdd())
+            if (decisionMaker.MakeDecisionBasedOnState(state, id))
             {
                 SetStateNewShootingPos();
             }

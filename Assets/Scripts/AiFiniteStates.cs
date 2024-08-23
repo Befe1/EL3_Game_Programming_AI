@@ -25,6 +25,7 @@ public class AiFiniteStates : MonoBehaviour
     protected NavMeshAgent agent;
     [SerializeField] protected int rayDistance;
     private int defaultRayDistance;
+    
     Animator anim;
     
 
@@ -79,16 +80,6 @@ public class AiFiniteStates : MonoBehaviour
     } 
     
     
-
-    /// <summary>
-    /// Get Random
-    /// </summary>
-    /// <returns></returns>
-    public bool isRandomOdd()
-    {
-        var r = UnityEngine.Random.Range(1, 99);
-        return r % 2 != 0;
-    }
     
     public void SetRayDistance(int distance, float duration)
     {
