@@ -11,7 +11,8 @@ using System;
 public enum AiId
 {
     Ai_a,
-    Ai_b
+    Ai_b,
+    None
 }
 public class GameManager : MonoBehaviour
 {

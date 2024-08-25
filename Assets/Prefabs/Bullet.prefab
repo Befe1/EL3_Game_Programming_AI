@@ -261,3 +261,4 @@ MonoBehaviour:
   lineRenderer: {fileID: 8610682562206548641}
   hitParticlePrefab: {fileID: 5196018208085081385, guid: da242d64ae52ab3499bec5c5bdf7f3cb, type: 3}
   speed: 1000
+  maxDistance: 1000

@@ -1,17 +1,13 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Cover Random Location Provider
-/// </summary>
 public class CoverWayPointManager : MonoBehaviour
 {
     public static CoverWayPointManager Instance { get; private set; }
 
     [SerializeField] Transform[] wayPoints;
-
+    [SerializeField] private float coverDistanceThreshold = 10f; // Define a reasonable distance
 
     private void Awake()
     {
@@ -19,7 +15,8 @@ public class CoverWayPointManager : MonoBehaviour
 
         Instance = this;
     }
-     // Method to get the closest waypoint
+
+    // Method to get the closest waypoint
     public Transform GetClosestWayPoint(Vector3 position)
     {
         Transform closest = null;
@@ -37,12 +34,7 @@ public class CoverWayPointManager : MonoBehaviour
         return closest;
     }
 
-    
-
-    /// <summary>
-    /// Random the Positions of Cover
-    /// </summary>
-    /// <param name="array"></param>
+    // Randomize the Positions of Cover
     void Shuffle(Transform[] array)
     {
         int p = array.Length;
@@ -57,38 +49,32 @@ public class CoverWayPointManager : MonoBehaviour
         wayPoints = array;
     }
 
-    /// <summary>
-    /// Get the Right Cover Position Transform
-    /// </summary>
-    /// <param name="ai"></param>
-    /// <returns></returns>
+    // Get the Right Cover Position Transform
     public Transform GetPos(AiId ai)
     {
         Shuffle(wayPoints);
 
-        var targetAi = GameManager.Instance.GetAi(ai);
+        Transform targetTransform = GameManager.Instance.GetAi(ai);
+        if (targetTransform == null)
+        {
+            return null; // AI Transform not found
+        }
 
         foreach (Transform t in wayPoints)
         {
-
-
             RaycastHit hit;
-            Vector3 raycastDir = (targetAi.position + new Vector3(0, .3f, 0)) - t.position;
-           
+            Vector3 raycastDir = (targetTransform.position + new Vector3(0, .3f, 0)) - t.position;
+
             if (Physics.Raycast(t.position + new Vector3(0, .3f, 0), raycastDir, out hit, 1000))
             {
-
                 var heading = (hit.point - t.position + new Vector3(0, .3f, 0));
                 var distance = heading.magnitude;
-                var direction = heading / distance; 
-
-               
+                var direction = heading / distance;
 
                 Color color = Color.red;
 
                 if (hit.collider.gameObject.name.StartsWith("Runner"))
                 {
-
                     color = Color.green;
                 }
                 else
@@ -97,65 +83,70 @@ public class CoverWayPointManager : MonoBehaviour
                 }
 
                 Debug.DrawRay(t.position + new Vector3(0, .3f, 0), direction * distance, color);
-
                 Debug.Log("Did Hit => " + hit.collider.gameObject.name);
             }
             else
             {
                 Debug.DrawRay(t.position + new Vector3(0, 0, 0), raycastDir * 1000, Color.black);
-               // Debug.Log("Did not Hit");
             }
-
         }
-
 
         return null;
     }
-    
 
-    /// <summary>
-    /// Detect if Enemy is Direct Seen from sight
-    /// </summary>
-    /// <param name="enemyId"></param>
-    /// <param name="ai"></param>
-    /// <returns></returns>
-    public bool IsEnemySeen(AiId enemyId,Transform ai)
+    // Detect if Enemy is Directly Seen from sight
+    public bool IsEnemySeen(AiId enemyId, Transform ai)
     {
-        var targetAi = GameManager.Instance.GetAi(enemyId);
+        Transform targetTransform = GameManager.Instance.GetAi(enemyId);
+        if (targetTransform == null)
+        {
+            return false; // AI Transform not found
+        }
 
         RaycastHit hit;
-        Vector3 raycastDir = (targetAi.position + new Vector3(0, .3f, 0)) - ai.position;
+        Vector3 raycastDir = (targetTransform.position + new Vector3(0, .3f, 0)) - ai.position;
 
         if (Physics.Raycast(ai.position + new Vector3(0, .3f, 0), raycastDir, out hit, 1000))
         {
-
             var heading = (hit.point - ai.position + new Vector3(0, .3f, 0));
             var distance = heading.magnitude;
             var direction = heading / distance;
 
             Color color = Color.red;
 
-
             Debug.DrawRay(ai.position + new Vector3(0, .3f, 0), direction * distance, color);
 
-           // Debug.Log("Did Hit => " + hit.collider.gameObject.name);
-
             if (hit.collider.gameObject.name.StartsWith("Runner"))
-            {             
+            {
                 return true;
             }
             else
             {
                 return false;
             }
-
         }
 
         return false;
+    }
 
+    // Check if the enemy is in cover
+    public bool IsEnemyInCover(AiId enemyId)
+    {
+        Transform enemyTransform = GameManager.Instance.GetAi(enemyId);
+        if (enemyTransform == null)
+        {
+            return false; // AI Transform not found
+        }
 
+        Transform coverPosition = GetPos(enemyId);
+        if (coverPosition == null)
+        {
+            return false; // No cover position found
+        }
 
-
+        // Use the defined cover distance threshold
+        return Vector3.Distance(enemyTransform.position, coverPosition.position) < coverDistanceThreshold;
     }
 
 }
+
