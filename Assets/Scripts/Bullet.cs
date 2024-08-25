@@ -8,7 +8,7 @@ public class Bullet : MonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
     private Vector3 lastPosition;
     public GameObject hitParticlePrefab;
-    public float speed = 1000f;  // Speed of the bullet
+    public float speed = 9000;  // Speed of the bullet
     public float maxDistance = 1000f;  // Max distance the bullet can travel before being destroyed
 
     void Start()

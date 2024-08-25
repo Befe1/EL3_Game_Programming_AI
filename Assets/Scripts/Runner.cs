@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using BigRookGames.Weapons;
 using UnityEngine;
@@ -59,6 +60,10 @@ public class Runner : AiFiniteStates
     //bool isGoingTowardBonus = false;
     private float T_ShootDelay;
     private float T_ShootStateDelay;
+    private float searchingTimer; // Timer for the searching state of this AI
+    private bool isSpeedBoostActive = false; // Flag to track if speed boost is active
+    private float originalSpeed; // To store the original NavMeshAgent speed
+
 
     /// <summary>
     ///     Init and Ranomize some variable of Ai Bot
@@ -75,6 +80,8 @@ public class Runner : AiFiniteStates
         health = GetComponent<AiHealth>();
         AiHealth.OnGetShootAi += HandleGetShot;
         decisionMaker = GetComponent<AiDecisionMaker>();
+        originalSpeed = agent.speed; 
+        
     }
 
     private void OnDestroy()
@@ -131,7 +138,6 @@ public class Runner : AiFiniteStates
         //Debug.Log($"Current state of {id}: {state}, Other AI's state: {otherState}");
         var distance = GameManager.Instance.CalculateDistanceBetweenAIs();
         Debug.Log($"Distance between AI_a and AI_b: {distance}"); 
-
 
         if (T_ShootDelay < shootDelay)
             T_ShootDelay += Time.deltaTime;
@@ -285,6 +291,13 @@ public class Runner : AiFiniteStates
     /// </summary>
     private void StateSearching()
     {
+        searchingTimer += Time.deltaTime;
+        Debug.Log($"AI {id} has spent {searchingTimer:F2} seconds in the searching state");
+        if (searchingTimer > 10f && !isSpeedBoostActive)
+        {
+            StartCoroutine(BoostSpeedForLimitedTime(8f, 8f));
+        }
+
         if (state != AiStates.searching)
         {
             pathFollowTimer = 0;
@@ -327,6 +340,18 @@ public class Runner : AiFiniteStates
             transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
 
         Testing_T();
+    }
+     private IEnumerator BoostSpeedForLimitedTime(float newSpeed, float duration)
+    {
+        isSpeedBoostActive = true;
+        agent.speed = newSpeed;
+        Debug.Log($"AI {id} speed boosted to {newSpeed} for {duration} seconds.");
+
+        yield return new WaitForSeconds(duration);
+
+        agent.speed = 8;
+        isSpeedBoostActive = false;
+        Debug.Log($"AI {id} speed reset to {originalSpeed}.");
     }
 
     private void Testing_T()
@@ -382,13 +407,16 @@ public class Runner : AiFiniteStates
             Debug.Log("Alerted");
             state = AiStates.alerted;
             currentAlertedTime = alertedTime; // Reset the alert timer
+            
         }
     }
 
     private void HandleAlertState()
     {
-        if (currentAlertedTime == alertedTime) // Check if it's the initial call for alert state
+        if (currentAlertedTime == alertedTime)
+        s_manager.Instance.PlaySound("Alert"); // Check if it's the initial call for alert state
             currentRayDistance = increasedRayDistance; // Increase ray distance
+             
 
         SmoothRotateTowards(lastHitPosition);
 

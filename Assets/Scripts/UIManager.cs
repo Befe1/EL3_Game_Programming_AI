@@ -12,6 +12,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] Image imgAi_b;
     [SerializeField] GameObject gameOverUI;
     [SerializeField] TextMeshProUGUI txtWonAi;
+     [SerializeField] private GameObject exclamationAi_a; // Exclamation mark for Ai_a
+    [SerializeField] private GameObject exclamationAi_b; // Exclamation mark for Ai_b
+    
+    
 
     private void Awake()
     {
@@ -21,7 +25,33 @@ public class UIManager : MonoBehaviour
     }
     void Start()
     {
-        
+        exclamationAi_a.SetActive(false);
+        exclamationAi_b.SetActive(false);
+    }
+    private void Update()
+    {
+        // Check current states of AIs and update UI accordingly
+        UpdateExclamation(AiId.Ai_a, exclamationAi_a);
+        UpdateExclamation(AiId.Ai_b, exclamationAi_b);
+    }
+
+    private void UpdateExclamation(AiId aiId, GameObject exclamationImage)
+    {
+        AiStates currentState = GameManager.Instance.GetAiState(aiId);
+        if (currentState == AiStates.alerted)
+        {
+            if (!exclamationImage.activeSelf)
+            {
+                exclamationImage.SetActive(true);
+            }
+        }
+        else
+        {
+            if (exclamationImage.activeSelf)
+            {
+                exclamationImage.SetActive(false);
+            }
+        }
     }
     /// <summary>
     /// Get the Bullet Hit event from Ai Bot when Bullet Hit
@@ -47,6 +77,7 @@ public class UIManager : MonoBehaviour
             gameOverUI.SetActive(true);
         }
     }
+     
 
     private void OnEnable()
     {

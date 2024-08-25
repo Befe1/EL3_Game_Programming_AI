@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     
     
     private Dictionary<AiId, AiStates> aiStates;
+   
     
     private void Awake()
     {
@@ -54,6 +55,7 @@ public class GameManager : MonoBehaviour
         }
         return AiStates.searching; // Return a default state if not found
     }
+    
    
 
     /// <summary>

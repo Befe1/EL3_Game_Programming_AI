@@ -91,7 +91,7 @@ namespace BigRookGames.Weapons
                 Invoke("ReEnableDisabledProjectile", 3);
             }
 
-            // --- Handle Audio ---
+            // --- Handle Audio --- //NotWorking Great
             if (source != null)
             {
                 //// --- Sometimes the source is not attached to the weapon for easy instantiation on quick firing weapons like machineguns, 

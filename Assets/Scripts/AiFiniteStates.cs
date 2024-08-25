@@ -12,8 +12,6 @@ public enum AiStates
     onCover,
     goingToNewShootingPos,
     alerted,
-   
-   
     
 
 }
@@ -36,6 +34,7 @@ public class AiFiniteStates : MonoBehaviour
         defaultRayDistance = rayDistance;
     }
     
+    
 
     /// <summary>
     /// Animation and Rotation of Agent
@@ -47,6 +46,7 @@ public class AiFiniteStates : MonoBehaviour
 
 
         anim.SetFloat("Speed",agent.velocity.magnitude);
+        
 
     }
     /// <summary>
