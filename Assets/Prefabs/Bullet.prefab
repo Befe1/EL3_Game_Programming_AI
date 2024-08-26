@@ -262,3 +262,5 @@ MonoBehaviour:
   hitParticlePrefab: {fileID: 5196018208085081385, guid: da242d64ae52ab3499bec5c5bdf7f3cb, type: 3}
   speed: 1000
   maxDistance: 1000
+  bulletType: 0
+  cameraShake: {fileID: 4859502938656143317, guid: f67a18c087374774aa74ec6003cab7c7, type: 3}

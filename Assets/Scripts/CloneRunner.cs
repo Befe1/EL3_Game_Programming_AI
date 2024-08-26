@@ -6,6 +6,7 @@ public class CloneRunner : MonoBehaviour
 {
     [SerializeField]
     private float speed = 177;
+    public GameObject explosionEffect;
     void Start()
     {
         Invoke(nameof(ActiveCollider),.3f);
@@ -31,6 +32,8 @@ public class CloneRunner : MonoBehaviour
 
     void Explode()
     {
+        s_manager.Instance.PlaySound("Explosion");
+        Instantiate(explosionEffect, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 }

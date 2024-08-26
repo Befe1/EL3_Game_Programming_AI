@@ -431,6 +431,7 @@ public class Runner : AiFiniteStates
 
             var b = Instantiate(bullet, bulletSpawnPoint.position, transform.rotation);
             b.GetComponent<Bullet>().speed = 97;
+            AudioSource.PlayClipAtPoint(s_manager.Instance.GetClip("ShootSound"), bulletSpawnPoint.position);
 
             gunFx.FireWeapon();
         }
@@ -696,7 +697,7 @@ public class Runner : AiFiniteStates
     }
 
     /// <summary>
-    ///     Cover State Setting
+    ///Cover State Setting     
     /// </summary>
     private void SetGoingToCoverState()
     {

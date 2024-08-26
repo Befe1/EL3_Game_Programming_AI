@@ -290,6 +290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 21
+  explosionEffect: {fileID: 5196018208085081385, guid: e1bf64fd6a2840a42977a073021263de, type: 3}
 --- !u!1 &514310835869315387
 GameObject:
   m_ObjectHideFlags: 0
@@ -3512,7 +3513,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: daefa705ef855b94aa9616e2a00b48aa, type: 2}
+  - {fileID: 2100000, guid: 6820227650c58a240ae9e1563879902a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5010,7 +5011,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: daefa705ef855b94aa9616e2a00b48aa, type: 2}
+  - {fileID: 2100000, guid: 6820227650c58a240ae9e1563879902a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
