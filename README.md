@@ -5,14 +5,24 @@ Framework: Centralized Script for AI Attributes
 Common Attributes: Shooting, Alert, Take Cover, Moving to Cover
 Positioning: Randomized for both AIs
 Decision-Making: Shared logic across both AIs
+
+
+
 Iteration 1: AI_A Abilities
 
 Stun: Stuns the enemy AI for a specified amount of time.
 RapidShot: Increases AI_A's shooting rate.
+
+
+
 Iteration 2: AI_B Abilities
 
 Clone: Runs towards the enemy AI and explodes.
 SniperShot: Inflicts significant damage on the enemy.
+
+
+
+
 
 Rule of each sprint 
 1.commits need to self explained and if there bugs or future adjust should be add it
