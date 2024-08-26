@@ -12,10 +12,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] Image imgAi_b;
     [SerializeField] GameObject gameOverUI;
     [SerializeField] TextMeshProUGUI txtWonAi;
-     [SerializeField] private GameObject exclamationAi_a; // Exclamation mark for Ai_a
+    [SerializeField] private GameObject exclamationAi_a; // Exclamation mark for Ai_a
     [SerializeField] private GameObject exclamationAi_b; // Exclamation mark for Ai_b
-    
-    
+    [SerializeField] Runner Ai_a;
+    [SerializeField] Runner Ai_b;
+
 
     private void Awake()
     {
@@ -78,6 +79,12 @@ public class UIManager : MonoBehaviour
         }
     }
      
+
+    public void DebugStartFight()
+    {
+        Ai_a.DebugStartFight(Ai_b.transform);
+        Ai_b.DebugStartFight(Ai_a.transform);
+    }
 
     private void OnEnable()
     {

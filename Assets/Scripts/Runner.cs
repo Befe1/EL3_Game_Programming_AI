@@ -17,7 +17,7 @@ public class Runner : AiFiniteStates
     [SerializeField] private Transform bulletSpawnPoint;
     [SerializeField] private float coverDelay = .5f;
     [SerializeField] private float coverStateDelay = .5f;
-   [SerializeField]private float minDistanceBetweenAIs = 10f;
+   [SerializeField]private float minDistanceBetweenAIs = 20f;
     private float currentAlertedTime;
     private AiDecisionMaker decisionMaker;
 
@@ -38,6 +38,7 @@ public class Runner : AiFiniteStates
 
     private Vector3 lastHitPosition;
     private Transform otherAi;
+    public Transform GetOtherAi { get => otherAi; }
     [SerializeField] private readonly float pathFollowDelay = 5f;
 
     private float pathFollowTimer;
@@ -49,6 +50,7 @@ public class Runner : AiFiniteStates
     [SerializeField] private readonly float rotationSpeed = 5;
     [SerializeField] private readonly float shootDelay = .5f;
     [SerializeField] private float shootStateDelay = .5f;
+    [SerializeField] private float stunStateDelay = 3f;
     [SerializeField] private readonly float similarityThreshold = 1.5f;
     [SerializeField] private GameObject spotLight;
     private float T_CoverDelay;
@@ -63,7 +65,7 @@ public class Runner : AiFiniteStates
     private float searchingTimer; // Timer for the searching state of this AI
     private bool isSpeedBoostActive = false; // Flag to track if speed boost is active
     private float originalSpeed; // To store the original NavMeshAgent speed
-
+    private float T_StunStateDelay;
 
     /// <summary>
     ///     Init and Ranomize some variable of Ai Bot
@@ -161,7 +163,12 @@ public class Runner : AiFiniteStates
         else if (state == AiStates.goingToNewShootingPos)
             StateNewShootingPos();
         else if (state == AiStates.alerted) HandleAlertState();
-        recordTimer += Time.deltaTime;
+
+        else if (state == AiStates.stun)
+            StateStun();
+
+
+            recordTimer += Time.deltaTime;
         if (recordTimer >= recordInterval)
         {
             RecordCurrentPosition();
@@ -170,6 +177,24 @@ public class Runner : AiFiniteStates
 
         if (distance < 10.0f && state != AiStates.searching && state != AiStates.alerted) AdjustPosition();
         DebugClosestCoverPoint();
+    }
+
+    private void StateStun()
+    {
+        if (T_StunStateDelay >= stunStateDelay)
+        {
+            agent.isStopped = false;
+
+            if (otherAi != null)
+                SetStateNewShootingPos();
+            else
+                state = AiStates.searching;
+        }
+        else
+        {
+            agent.isStopped = true;
+            T_StunStateDelay += Time.deltaTime;
+        }
     }
 
     private void RecordCurrentPosition()
@@ -354,6 +379,17 @@ public class Runner : AiFiniteStates
         Debug.Log($"AI {id} speed reset to {originalSpeed}.");
     }
 
+    public void DebugStartFight(Transform _otherAi)
+    {
+        spotLight.SetActive(false);
+        otherAi = _otherAi;
+
+        if (decisionMaker.MakeDecisionBasedOnState(state, id, health.health))
+            state = AiStates.shooting;
+        else
+            state = AiStates.goingToCover;
+    }
+
     private void Testing_T()
     {
         RaycastHit hit;
@@ -395,10 +431,8 @@ public class Runner : AiFiniteStates
 
             var b = Instantiate(bullet, bulletSpawnPoint.position, transform.rotation);
             b.GetComponent<Bullet>().speed = 97;
-            gunFx.FireWeapon();
-            AudioSource.PlayClipAtPoint(s_manager.Instance.GetClip("ShootSound"), bulletSpawnPoint.position);
-            
 
+            gunFx.FireWeapon();
         }
     }
 
@@ -436,7 +470,8 @@ public class Runner : AiFiniteStates
     ///     Stae of Stand Shoot
     /// </summary>
     private void StateShoot(AiId otherAiId)
-    {
+    {     
+
         agent.isStopped = true;
         Shoot();
 
@@ -446,9 +481,12 @@ public class Runner : AiFiniteStates
         if (T_ShootStateDelay >= shootStateDelay)
         {
             T_ShootStateDelay = 0;
+            if (RandomPowerUps()) return;
 
             // Use IsEnemyInCover method with AiId directly
             bool opponentInCover = CoverWayPointManager.Instance.IsEnemyInCover(otherAiId);
+
+           
 
             if (opponentInCover)
             {
@@ -476,6 +514,35 @@ public class Runner : AiFiniteStates
                 }
             }
         }
+    }
+
+
+    private bool RandomPowerUps()
+    {
+        if (powerUps.Count > 0)
+        {
+
+            powerUps.Shuffle();
+
+            if (Random.Range(1, 5) == 3)
+            {
+                foreach (var item in powerUps)
+                {
+                    {
+                        if (item.IsReady)
+                        {
+                            state = AiStates.powerUp;
+                            item.Activate();
+                            Debug.Log("Power up ...");
+                            return true;              
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return false;
     }
 
 
@@ -535,6 +602,7 @@ public class Runner : AiFiniteStates
 
                 if (T_CoverDelay >= coverDelay && isCoverStand)
                 {
+
                     isCoverStand = false;
 
                     if (d > 70f)
@@ -576,6 +644,8 @@ public class Runner : AiFiniteStates
             GetComponents<Collider>()[0].enabled = true;
             Shoot();
             SetAnimCover(false);
+
+            if (RandomPowerUps()) return;
         }
         else //StayOncOVER
         {
@@ -636,9 +706,28 @@ public class Runner : AiFiniteStates
         GetComponents<Collider>()[0].enabled = true;
     }
 
+    private void SetStunState()
+    {
+        SetAnimCover(false);
+        state = AiStates.stun;
+        T_StunStateDelay = 0;       
+        agent.SetDestination(transform.position);
+        GetComponents<Collider>()[0].enabled = true;
+    }
+
     private void LateUpdate()
     {
         Updates();
+    }
+
+    /// <summary>
+    /// PowerUp Deactive and New state
+    /// </summary>
+    public void PowerupDeactive()
+    {
+        Debug.Log("Stop powerup ...");
+        state = AiStates.goingToNewShootingPos;
+        StateNewShootingPos();
     }
 
     private void ActiveDeactiveAll(GameObject[] objs, bool val)
@@ -652,11 +741,27 @@ public class Runner : AiFiniteStates
     /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
+       
         if (other.name.StartsWith("Bullet")|| other.GetComponent<Bullet>() != null)
         {
-            lastHitPosition = other.transform.position; // Store the hit position
+            lastHitPosition = other.transform.position; // Store the hit position                
+            var bulletType = other.transform.parent.GetComponent<Bullet>().bulletType;
+            health.GetShoot(bulletType);
+
+            if (bulletType == BulletType.stun)
+            {
+                SetStunState();
+                Debug.Log("Set Stun ... ");
+            }
+
             Destroy(other.gameObject);
-            health.GetShoot();
+        }
+
+
+        if (other.name.StartsWith("Clone"))
+        {
+            health.GetShoot( BulletType.clone);
+            Destroy(other.gameObject);
         }
     }
 
