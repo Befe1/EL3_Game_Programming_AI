@@ -49,6 +49,7 @@ public class Bullet : MonoBehaviour
                 {
                     Instantiate(hitParticlePrefab, hit.point, Quaternion.identity);
                 }
+                AudioSource.PlayClipAtPoint(s_manager.Instance.GetClip("HitSound"), hit.point);
 
                 // Notify the GameManager that the AI was hit
                 AiId hitAiId = hit.collider.GetComponent<Runner>().id;  // Assuming the Runner script contains the AI ID
@@ -58,6 +59,8 @@ public class Bullet : MonoBehaviour
                 return;
             }
         }
+        
+        
 
         // Update positions for line renderer
         lineRenderer.SetPosition(0, lastPosition);

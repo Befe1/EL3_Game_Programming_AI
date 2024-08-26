@@ -57,6 +57,18 @@ public class s_manager : MonoBehaviour
             Debug.LogWarning($"Sound '{name}' not found!");
         }
     }
+    public AudioClip GetClip(string name)
+    {
+        if (audioSources.ContainsKey(name))
+        {
+            return audioSources[name].clip;
+        }
+        else
+        {
+            Debug.LogWarning($"Sound '{name}' not found!");
+            return null;
+        }
+    }
 
     public void StopSound(string name)
     {

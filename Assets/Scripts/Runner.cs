@@ -17,7 +17,7 @@ public class Runner : AiFiniteStates
     [SerializeField] private Transform bulletSpawnPoint;
     [SerializeField] private float coverDelay = .5f;
     [SerializeField] private float coverStateDelay = .5f;
-   [SerializeField]private float minDistanceBetweenAIs = 20f;
+   [SerializeField]private float minDistanceBetweenAIs = 10f;
     private float currentAlertedTime;
     private AiDecisionMaker decisionMaker;
 
@@ -395,8 +395,10 @@ public class Runner : AiFiniteStates
 
             var b = Instantiate(bullet, bulletSpawnPoint.position, transform.rotation);
             b.GetComponent<Bullet>().speed = 97;
-
             gunFx.FireWeapon();
+            AudioSource.PlayClipAtPoint(s_manager.Instance.GetClip("ShootSound"), bulletSpawnPoint.position);
+            
+
         }
     }
 
