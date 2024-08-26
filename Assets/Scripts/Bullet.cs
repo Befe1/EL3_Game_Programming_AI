@@ -1,7 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+public enum BulletType
+{
+    bullet,
+    rapidBullet,
+    stun,
+    clone,
+    sniper
 
+}
+//
 public class Bullet : MonoBehaviour
 {
     public float trailDuration = 0.1f;
@@ -10,6 +19,7 @@ public class Bullet : MonoBehaviour
     public GameObject hitParticlePrefab;
     public float speed = 9000;  // Speed of the bullet
     public float maxDistance = 1000f;  // Max distance the bullet can travel before being destroyed
+    public BulletType bulletType = BulletType.bullet;
 
     void Start()
     {
@@ -27,6 +37,23 @@ public class Bullet : MonoBehaviour
 
         // Auto-destroy the bullet after 5 seconds to prevent memory leaks
         Destroy(gameObject, 5f);
+    }
+    public void SetRapidBullet()
+    {
+        bulletType = BulletType.rapidBullet;
+        speed = 277;
+    }
+
+    public void SetStunBullet()
+    {
+        bulletType = BulletType.stun;
+        speed = 377;
+    }
+
+    public void SetSniper()
+    {
+        bulletType = BulletType.sniper;
+        speed = 477;
     }
 
     void Update()

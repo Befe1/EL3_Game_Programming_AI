@@ -12,6 +12,8 @@ public enum AiStates
     onCover,
     goingToNewShootingPos,
     alerted,
+    powerUp,
+    stun
     
 
 }
@@ -23,15 +25,27 @@ public class AiFiniteStates : MonoBehaviour
     protected NavMeshAgent agent;
     [SerializeField] protected int rayDistance;
     private int defaultRayDistance;
-    
+    [SerializeField,SerializeReference]
+    private GameObject[] IPowerUps;
+
+    protected List<IPowerUp> powerUps = new List<IPowerUp>();
+
     Animator anim;
     
+
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
         defaultRayDistance = rayDistance;
+
+        foreach (var p in IPowerUps)
+        {
+            powerUps.Add(p.GetComponent<IPowerUp>());
+        }
+
+        
     }
     
     
@@ -93,5 +107,6 @@ public class AiFiniteStates : MonoBehaviour
         rayDistance = defaultRayDistance;
     }
     
-
+  
 }
+
